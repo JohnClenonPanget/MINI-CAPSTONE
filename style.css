@@ -9,7 +9,6 @@ body {
     font-family: 'Fredoka', cursive, sans-serif;
 }
 
-/* Gemini Bakery logo text styling for any text-only fallback */
 .gemini-logo-text {
     font-family: 'Fredoka', cursive, sans-serif;
     color: #FACC15;
@@ -32,7 +31,6 @@ body {
          1.5px  1.5px 0 #880808;
 }
 
-/* Custom scrollbars */
 .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -48,7 +46,6 @@ body {
     border-radius: 8px;
 }
 
-/* Product Card animations */
 .product-card {
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -58,18 +55,15 @@ body {
     box-shadow: 0 12px 24px -6px rgba(185, 28, 28, 0.15);
 }
 
-/* Animated Pulse */
 @keyframes pulse-ring {
     0% {
         transform: scale(0.95);
         opacity: 0.8;
     }
-
     50% {
         transform: scale(1.05);
         opacity: 1;
     }
-
     100% {
         transform: scale(0.95);
         opacity: 0.8;
@@ -80,7 +74,6 @@ body {
     animation: pulse-ring 2s infinite ease-in-out;
 }
 
-/* Star rating interactivity */
 .star-rating i {
     transition: color 0.15s ease-in-out, transform 0.15s ease-in-out;
     cursor: pointer;
@@ -92,7 +85,6 @@ body {
     transform: scale(1.15);
 }
 
-/* Receipt logo sizing */
 .receipt-logo {
     display: block;
     object-fit: contain;
@@ -100,7 +92,6 @@ body {
     height: auto;
 }
 
-/* Keep the receipt clean when printed */
 @media print {
     body * {
         visibility: hidden;
@@ -136,13 +127,8 @@ body {
     #receipt-modal button {
         display: none !important;
     }
-    
-
-
 }
 
-
-/* Welcome modal and optional Remember Me preference */
 .welcome-logo { width: 190px; max-width: 70%; height: auto; }
 .remember-option { cursor: pointer; }
 .feedback-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(250px, 0.9fr); gap: 1.5rem; align-items: start; }
@@ -150,6 +136,7 @@ body {
 .customer-feedback-panel { min-width: 0; }
 .published-feedback-card { border: 1px solid #fde68a; background: #fffbeb; border-radius: 0.9rem; padding: 0.8rem; }
 .published-feedback-stars { color: #eab308; letter-spacing: 1px; }
+
 @media (max-width: 800px) {
     .feedback-layout { grid-template-columns: minmax(0, 1fr); }
     .customer-feedback-panel { order: 2; }

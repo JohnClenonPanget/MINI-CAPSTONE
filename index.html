@@ -81,11 +81,11 @@
                 <h2 id="welcome-title" class="text-2xl font-black text-gemini-red">Welcome, Suki!</h2>
                 <p class="text-sm text-gray-600">Welcome to Gemini Bakery Express. Continue as a guest and start ordering.</p>
             </div>
-            <label class="remember-option flex items-center justify-center gap-2 text-sm font-bold text-gemini-dark">
+            <label class="remember-option flex items-center justify-center gap-2 text-sm font-bold text-gemini-dark cursor-pointer">
                 <input id="remember-me-checkbox" type="checkbox" class="w-4 h-4 accent-red-700">
                 <span>Remember Me</span>
             </label>
-            <p class="text-[11px] text-gray-500">Saves your demo preferences and activity on this device only when selected. Shared order history and reviews across devices require a secure server and database.</p>
+            <p class="text-[11px] text-gray-500 leading-tight">Tandaan ang impormasyon ko para sa mas mabilis na pag-order at pagsusubaybay sa aking mga transaksyon sa susunod.</p>
             <button id="continue-as-guest-btn" type="button" class="w-full py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-gemini-dark font-black rounded-xl shadow transition">Continue as Guest <i class="fa-solid fa-arrow-right ml-1"></i></button>
         </div>
     </div>
@@ -116,7 +116,7 @@
                     <div class="flex items-center space-x-2 sm:space-x-3">
                         <nav class="flex bg-red-900/60 p-1 rounded-xl border border-red-500/50 text-xs font-bold">
                             <button id="nav-menu-btn" class="nav-tab active px-3 py-1.5 rounded-lg bg-gemini-yellow text-gemini-dark shadow font-extrabold flex items-center gap-1.5 transition">
-                                <i class="fa-solid fa-store"></i> <span class="hidden sm:inline">Menu</span>
+                                <i class="fa-solid fa-store"></i> <span class="hidden sm:inline">Bakery</span>
                             </button>
                             <button id="nav-orders-btn" class="nav-tab px-3 py-1.5 rounded-lg text-amber-100 hover:text-white flex items-center gap-1.5 transition">
                                 <i class="fa-solid fa-box-archive"></i> <span class="hidden sm:inline">My Orders</span>
@@ -202,46 +202,44 @@
                         </div>
                     </div>
 
-                    
-                    
                     <!-- OTHER LUCENA BRANCHES -->
-<div class="bg-white p-5 rounded-2xl shadow-sm border border-red-100 space-y-3">
-    <div>
-        <h3 class="text-xs font-black uppercase tracking-wider text-gemini-red flex items-center gap-1.5">
-            <i class="fa-solid fa-sitemap"></i> Other Lucena Branches
-        </h3>
-        <p class="text-[11px] text-gray-500 font-medium mt-0.5">You can also visit us on:</p>
-    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-red-100 space-y-3">
+                        <div>
+                            <h3 class="text-xs font-black uppercase tracking-wider text-gemini-red flex items-center gap-1.5">
+                                <i class="fa-solid fa-sitemap"></i> Other Lucena Branches
+                            </h3>
+                            <p class="text-[11px] text-gray-500 font-medium mt-0.5">You can also visit us on:</p>
+                        </div>
 
-    <div class="space-y-2.5 text-xs">
-        <!-- Gulang-Gulang Branch -->
-        <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-100 space-y-1">
-            <div class="flex items-center justify-between">
-                <span class="font-bold text-gemini-dark">Gulang-Gulang Branch</span>
-                <span class="branch-status-tag text-[10px] font-bold px-2 py-0.5 rounded uppercase">--</span>
-            </div>
-            <p class="text-[11px] text-gray-500">Maharlika Highway, Brgy. Gulang-Gulang, Lucena City</p>
-        </div>
+                        <div class="space-y-2.5 text-xs">
+                            <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-100 space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-gemini-dark">Gulang-Gulang Branch</span>
+                                    <span class="branch-status-tag text-[10px] font-bold px-2 py-0.5 rounded uppercase">--</span>
+                                </div>
+                                <p class="text-[11px] text-gray-500">Maharlika Highway, Brgy. Gulang-Gulang, Lucena City</p>
+                            </div>
 
-        <!-- Iyam Branch -->
-        <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-100 space-y-1">
-            <div class="flex items-center justify-between">
-                <span class="font-bold text-gemini-dark">Iyam Branch</span>
-                <span class="branch-status-tag text-[10px] font-bold px-2 py-0.5 rounded uppercase">--</span>
-            </div>
-            <p class="text-[11px] text-gray-500">Quezon Avenue, Brgy. Iyam, Lucena City</p>
-        </div>
+                            <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-100 space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-gemini-dark">Iyam Branch</span>
+                                    <span class="branch-status-tag text-[10px] font-bold px-2 py-0.5 rounded uppercase">--</span>
+                                </div>
+                                <p class="text-[11px] text-gray-500">Quezon Avenue, Brgy. Iyam, Lucena City</p>
+                            </div>
 
-        <!-- Red-V Branch -->
-        <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-100 space-y-1">
-            <div class="flex items-center justify-between">
-                <span class="font-bold text-gemini-dark">Red-V Branch</span>
-                <span class="branch-status-tag text-[10px] font-bold px-2 py-0.5 rounded uppercase">--</span>
+                            <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-100 space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-gemini-dark">Red-V Branch</span>
+                                    <span class="branch-status-tag text-[10px] font-bold px-2 py-0.5 rounded uppercase">--</span>
+                                </div>
+                                <p class="text-[11px] text-gray-500">Diversion Road corner Red-V, Lucena City</p>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
             </div>
-            <p class="text-[11px] text-gray-500">Diversion Road corner Red-V, Lucena City</p>
         </div>
-    </div>
-</div>
 
         <!-- VIEW 2: ORDER STATUS & TRACKING SCREEN -->
         <div id="view-orders" class="hidden flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -261,9 +259,7 @@
                 <h3 class="font-extrabold text-sm text-gemini-red uppercase tracking-wider flex items-center gap-2">
                     <i class="fa-solid fa-spinner"></i> Active Fulfillment Queue (To Pick Up / To Deliver)
                 </h3>
-                <div id="active-orders-list" class="space-y-4">
-                    <!-- Injected by JS -->
-                </div>
+                <div id="active-orders-list" class="space-y-4"></div>
                 <div id="no-active-orders" class="bg-white p-8 rounded-2xl text-center border border-red-100 shadow-sm">
                     <i class="fa-solid fa-box-open text-4xl text-amber-200 mb-2"></i>
                     <p class="text-sm font-bold text-gemini-dark">Walang kasalukuyang active order.</p>
@@ -276,9 +272,7 @@
                 <h3 class="font-extrabold text-sm text-gemini-dark uppercase tracking-wider flex items-center gap-2">
                     <i class="fa-solid fa-clock-rotate-left text-gemini-red"></i> Completed Transaction History & Audit Trail
                 </h3>
-                <div id="history-orders-list" class="space-y-3">
-                    <!-- Injected by JS -->
-                </div>
+                <div id="history-orders-list" class="space-y-3"></div>
                 <div id="no-history-orders" class="bg-white p-6 rounded-2xl text-center border border-gray-200 text-gray-400 text-xs">
                     Wala pang nakaraang completed transaction sa kasalukuyang session.
                 </div>
@@ -295,74 +289,73 @@
             </div>
 
             <div class="feedback-layout">
-              <main class="feedback-main space-y-6">
-            <!-- A. SERVICE FEEDBACK FORM AT THE TOP -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-red-100 space-y-4">
-                <h3 class="font-black text-gemini-red text-sm uppercase tracking-wide border-b border-red-100 pb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-store"></i> A. Service Feedback Form (Overall Experience)
-                </h3>
-                <form id="service-feedback-form" class="space-y-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gemini-dark mb-1">Inyong Pangalan / Suki Name <span class="text-red-500">*</span></label>
-                            <input type="text" id="service-author" required placeholder="e.g. Juan Cruz"
-                                class="w-full px-3 py-2 bg-amber-50/50 border border-amber-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-gemini-red focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gemini-dark mb-1">Overall Service Rating (1–5 Stars) <span class="text-red-500">*</span></label>
-                            <div class="star-rating service-stars flex items-center space-x-2 text-2xl text-gray-300 py-1" id="service-star-container">
-                                <i class="fa-solid fa-star" data-rating="1"></i>
-                                <i class="fa-solid fa-star" data-rating="2"></i>
-                                <i class="fa-solid fa-star" data-rating="3"></i>
-                                <i class="fa-solid fa-star" data-rating="4"></i>
-                                <i class="fa-solid fa-star" data-rating="5"></i>
+                <main class="feedback-main space-y-6">
+                    <!-- A. SERVICE FEEDBACK FORM AT THE TOP -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-red-100 space-y-4">
+                        <h3 class="font-black text-gemini-red text-sm uppercase tracking-wide border-b border-red-100 pb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-store"></i> A. Service Feedback Form (Overall Experience)
+                        </h3>
+                        <form id="service-feedback-form" class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gemini-dark mb-1">Inyong Pangalan / Suki Name <span class="text-red-500">*</span></label>
+                                    <input type="text" id="service-author" required placeholder="e.g. Juan Cruz"
+                                        class="w-full px-3 py-2 bg-amber-50/50 border border-amber-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-gemini-red focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gemini-dark mb-1">Overall Service Rating (1–5 Stars) <span class="text-red-500">*</span></label>
+                                    <div class="star-rating service-stars flex items-center space-x-2 text-2xl text-gray-300 py-1" id="service-star-container">
+                                        <i class="fa-solid fa-star" data-rating="1"></i>
+                                        <i class="fa-solid fa-star" data-rating="2"></i>
+                                        <i class="fa-solid fa-star" data-rating="3"></i>
+                                        <i class="fa-solid fa-star" data-rating="4"></i>
+                                        <i class="fa-solid fa-star" data-rating="5"></i>
+                                    </div>
+                                    <span id="service-rating-text" class="text-[10px] font-bold text-gemini-red">Pumili ng 1-5 stars</span>
+                                </div>
                             </div>
-                            <span id="service-rating-text" class="text-[10px] font-bold text-gemini-red">Pumili ng 1-5 stars</span>
+                            <div>
+                                <label class="block text-xs font-bold text-gemini-dark mb-1">Written Service Feedback <span class="text-gray-400 font-normal">(Optional)</span></label>
+                                <textarea id="service-comment" rows="2" placeholder="Napakahusay ng staff sa Palengke branch at mabilis ang delivery rider!"
+                                    class="w-full px-3 py-2 bg-amber-50/50 border border-amber-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-gemini-red focus:outline-none"></textarea>
+                            </div>
+                            <button type="submit" class="w-full py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-gemini-dark font-black text-xs sm:text-sm rounded-xl shadow transition transform active:scale-98 flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>Submit Service Feedback</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- B. INDIVIDUAL PRODUCT REVIEWS BELOW -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-red-100 space-y-4">
+                        <div class="flex items-center justify-between border-b border-red-100 pb-2">
+                            <h3 class="font-black text-gemini-red text-sm uppercase tracking-wide flex items-center gap-2">
+                                <i class="fa-solid fa-cookie-bite"></i> B. Individual Purchased Product Reviews
+                            </h3>
+                            <span class="text-xs bg-amber-100 text-gemini-dark font-bold px-2.5 py-1 rounded-full">Eligible items from completed orders</span>
+                        </div>
+
+                        <div id="product-review-cards-container" class="space-y-4"></div>
+                        <div id="no-reviewable-products" class="text-center py-8 text-gray-400 text-xs bg-amber-50/40 rounded-xl border border-amber-200">
+                            <i class="fa-solid fa-basket-shopping text-3xl text-amber-300 mb-2"></i>
+                            <p class="font-bold text-gemini-dark">Wala pang produkto na available para i-review.</p>
+                            <p class="mt-0.5">Kumpletuhin ang isang order at pindutin ang "Order Received" para makapag-submit ng sariling review sa bawat tinapay.</p>
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gemini-dark mb-1">Written Service Feedback <span class="text-gray-400 font-normal">(Optional)</span></label>
-                        <textarea id="service-comment" rows="2" placeholder="Napakahusay ng staff sa Palengke branch at mabilis ang delivery rider!"
-                            class="w-full px-3 py-2 bg-amber-50/50 border border-amber-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-gemini-red focus:outline-none"></textarea>
-                    </div>
-                    <button type="submit" class="w-full py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-gemini-dark font-black text-xs sm:text-sm rounded-xl shadow transition transform active:scale-98 flex items-center justify-center space-x-2">
-                        <i class="fa-solid fa-paper-plane"></i>
-                        <span>Submit Service Feedback</span>
-                    </button>
-                </form>
-            </div>
+                </main>
 
-            <!-- B. INDIVIDUAL PRODUCT REVIEWS BELOW -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-red-100 space-y-4">
-                <div class="flex items-center justify-between border-b border-red-100 pb-2">
-                    <h3 class="font-black text-gemini-red text-sm uppercase tracking-wide flex items-center gap-2">
-                        <i class="fa-solid fa-cookie-bite"></i> B. Individual Purchased Product Reviews
-                    </h3>
-                    <span class="text-xs bg-amber-100 text-gemini-dark font-bold px-2.5 py-1 rounded-full">Eligible items from completed orders</span>
-                </div>
-
-                <div id="product-review-cards-container" class="space-y-4">
-                    <!-- Dynamically populated based on completed purchases -->
-                </div>
-                <div id="no-reviewable-products" class="text-center py-8 text-gray-400 text-xs bg-amber-50/40 rounded-xl border border-amber-200">
-                    <i class="fa-solid fa-basket-shopping text-3xl text-amber-300 mb-2"></i>
-                    <p class="font-bold text-gemini-dark">Wala pang produkto na available para i-review.</p>
-                    <p class="mt-0.5">Kumpletuhin ang isang order at pindutin ang "Order Received" para makapag-submit ng sariling review sa bawat tinapay.</p>
-                </div>
-            </div>
-              </main>
-              <aside class="customer-feedback-panel bg-white p-5 rounded-2xl shadow-sm border border-red-100">
-                <div class="flex items-center gap-2 border-b border-red-100 pb-3 mb-3">
-                    <i class="fa-solid fa-comments text-gemini-red"></i>
-                    <div>
-                        <h3 class="font-black text-gemini-red text-sm">Customer Feedback</h3>
-                        <p class="text-[11px] text-gray-500">Published service ratings</p>
+                <aside class="customer-feedback-panel bg-white p-5 rounded-2xl shadow-sm border border-red-100">
+                    <div class="flex items-center gap-2 border-b border-red-100 pb-3 mb-3">
+                        <i class="fa-solid fa-comments text-gemini-red"></i>
+                        <div>
+                            <h3 class="font-black text-gemini-red text-sm">Customer Feedback</h3>
+                            <p class="text-[11px] text-gray-500">Published service ratings</p>
+                        </div>
                     </div>
-                </div>
-                <div id="published-feedback-list" class="space-y-3">
-                    <p class="text-xs text-gray-500 bg-amber-50 rounded-xl p-3">No published customer feedback is available yet. Feedback submitted in this demo stays on this device; shared customer reviews require a backend and database.</p>
-                </div>
-              </aside>
+                    <div id="published-feedback-list" class="space-y-3">
+                        <p class="text-xs text-gray-500 bg-amber-50 rounded-xl p-3">No published customer feedback is available yet. Feedback submitted in this demo stays on this device; shared customer reviews require a backend and database.</p>
+                    </div>
+                </aside>
             </div>
         </div>
     </div>
@@ -426,6 +419,12 @@
 
                     <div>
                         <label class="block text-xs font-bold text-gemini-dark mb-1">Full Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="cust-name" required placeholder="Juan Cruz"
+                            class="w-full px-3 py-2 bg-amber-50/50 border border-amber-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-gemini-red focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gemini-dark mb-1">Contact Number <span class="text-red-500">*</span></label>
                         <input
                             type="tel"
                             id="cust-phone"
@@ -438,15 +437,7 @@
                             placeholder="e.g. 09171234567"
                             class="w-full px-3 py-2 bg-amber-50/50 border border-amber-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-gemini-red focus:outline-none"
                         >
-                        <p class="mt-1 text-[10px] text-gray-500">
-                            Enter exactly 11 digits, starting with 09.
-                        </p>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-gemini-dark mb-1">Contact Number <span class="text-red-500">*</span></label>
-                        <input type="tel" id="cust-phone" required placeholder="e.g. 09171234567"
-                            class="w-full px-3 py-2 bg-amber-50/50 border border-amber-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-gemini-red focus:outline-none">
+                        <p class="mt-1 text-[10px] text-gray-500">Enter exactly 11 digits, starting with 09.</p>
                     </div>
 
                     <div>
@@ -498,11 +489,7 @@
 
             <div id="printable-receipt" class="space-y-4 font-mono text-xs">
                 <div class="text-center border-b-2 border-dashed border-gray-300 pb-4">
-                    <img
-                        src="logo.svg"
-                        alt="Gemini Bakery Since 1975 logo"
-                        class="receipt-logo mx-auto mb-2 w-48 max-w-full h-auto"
-                    >
+                    <img src="logo.svg" alt="Gemini Bakery Since 1975 logo" class="receipt-logo mx-auto mb-2 w-48 max-w-full h-auto">
                     <p class="font-bold text-gray-800 font-sans text-xs">Palengke Branch (Lucena City)</p>
                     <p class="text-gray-500 text-[10px]">Juarez St. cor. Merchan St. | Official Pre-Order Slip</p>
 

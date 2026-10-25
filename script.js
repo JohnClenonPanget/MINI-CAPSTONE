@@ -33,7 +33,7 @@ const PRODUCTS = [
     // CAKES & PASTRIES (9 Items)
     { id: 22, name: "Roll Cake (Chocolate)", category: "CAKES & PASTRIES", price: 20.00, desc: "Fluffy chocolate sponge cake roll filled with fudge.", img: "https://i.pinimg.com/736x/b0/4c/d1/b04cd16f0b8ed4dd3829441136257918.jpg" },
     { id: 23, name: "Roll Cake (Mocha)", category: "CAKES & PASTRIES", price: 20.00, desc: "Mocha coffee infused sponge roll with buttercream.", img: "https://i.pinimg.com/1200x/2c/ef/36/2cef36843f7fc164ad3ea5d5cd710847.jpg" },
-     { id: 24, name: "Roll Cake (Ube)", category: "CAKES & PASTRIES", price: 20.00, desc: "Ube infused sponge roll with ube flavor.", img: "https://i.pinimg.com/736x/06/5b/c1/065bc1f0513591154022c9200afcfd9d.jpg" },
+    { id: 24, name: "Roll Cake (Ube)", category: "CAKES & PASTRIES", price: 20.00, desc: "Ube infused sponge roll with ube flavor.", img: "https://i.pinimg.com/736x/06/5b/c1/065bc1f0513591154022c9200afcfd9d.jpg" },
     { id: 25, name: "Chiffon Cake Slice", category: "CAKES & PASTRIES", price: 20.00, desc: "Light, airy slice of vanilla sponge chiffon cake.", img: "https://i.pinimg.com/736x/3b/5c/af/3b5cafd677242f029ac2242edc6b4fd0.jpg" },
     { id: 26, name: "Egg Pie (Whole)", category: "CAKES & PASTRIES", price: 160.00, desc: "Rich, creamy egg custard pie in a flaky pastry crust.", img: "https://i.pinimg.com/1200x/38/fb/34/38fb340666d2d1803f80b8ba8d61c31f.jpg" },
     { id: 27, name: "Egg Pie (Slice)", category: "CAKES & PASTRIES", price: 25.00, desc: "Slice of rich egg custard pie with golden toasted top.", img: "https://i.pinimg.com/1200x/3d/7b/a1/3d7ba161d0553b76af188cbd82df51d4.jpg" },
@@ -42,7 +42,6 @@ const PRODUCTS = [
     { id: 30, name: "Chocolate Crinkles (Tub)", category: "CAKES & PASTRIES", price: 7.00, desc: "Soft chocolate fudge cookies rolled in powdered sugar.", img: "https://i.pinimg.com/1200x/6f/8a/05/6f8a05c6be94f746d8929ba158d3c094.jpg" },
     { id: 31, name: "Uraro Cookies (Pack)", category: "CAKES & PASTRIES", price: 80.00, desc: "Melt-in-your-mouth arrowroot starch cookies.", img: "https://i.pinimg.com/736x/e4/35/2c/e4352ce0d63371c4cef7014cbf82c7ab.jpg" }
 ];
-
 
 let cart = [];
 let activeOrders = [];
@@ -97,10 +96,9 @@ function renderPublishedFeedback() {
     container.innerHTML = publishedServiceFeedback.slice().reverse().map(item => `
         <article class="published-feedback-card">
             <div class="flex items-start justify-between gap-2">
-                <p class="text-xs font-black text-gemini-dark break-words"></p>
+                <p class="text-xs font-black text-gemini-dark break-words">${escapeFeedbackText(item.name)}</p>
                 <span class="published-feedback-stars text-xs">${"★".repeat(item.rating)}${"☆".repeat(5-item.rating)}</span>
             </div>
-            <p class="text-[11px] font-bold text-gemini-dark">${escapeFeedbackText(item.name)}</p>
             <p class="text-xs text-gray-700 mt-1 break-words">${escapeFeedbackText(item.comment || "Rated the service.")}</p>
             <p class="text-[10px] text-gray-400 mt-2">${escapeFeedbackText(item.date || "Recently submitted")}</p>
         </article>`).join("");
@@ -128,72 +126,116 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const welcomeModal = document.getElementById("welcome-modal");
     const rememberCheckbox = document.getElementById("remember-me-checkbox");
-    rememberCheckbox.checked = rememberMeEnabled;
+    if (rememberCheckbox) {
+        rememberCheckbox.checked = rememberMeEnabled;
+    }
 
-    enterStoreBtn.addEventListener("click", () => {
-        welcomeModal.classList.remove("opacity-0", "pointer-events-none");
-    });
-
-    document.getElementById("continue-as-guest-btn").addEventListener("click", () => {
-        rememberMeEnabled = rememberCheckbox.checked;
-        localStorage.setItem(REMEMBER_KEY, rememberMeEnabled ? "true" : "false");
-        if (!rememberMeEnabled) {
-            localStorage.removeItem(APP_STATE_KEY);
-            localStorage.removeItem(FEEDBACK_KEY);
-            publishedServiceFeedback = [];
-        } else {
-            saveRememberedState();
-        }
-        welcomeModal.classList.add("opacity-0", "pointer-events-none");
-        landingPortal.classList.add("opacity-0", "pointer-events-none");
-        updateCartUI();
-        renderProducts();
-        renderOrdersUI();
-        renderReviewableProductsUI();
-        renderPublishedFeedback();
-    });
-
-    navMenuBtn.addEventListener("click", () => switchView("MENU"));
-    navOrdersBtn.addEventListener("click", () => switchView("ORDERS"));
-    navReviewBtn.addEventListener("click", () => switchView("REVIEW"));
-    document.getElementById("nav-brand-home").addEventListener("click", () => switchView("MENU"));
-
-    document.getElementById("search-input").addEventListener("input", (e) => {
-        searchQuery = e.target.value.toLowerCase();
-        renderProducts();
-    });
-
-    document.getElementById("category-filters").addEventListener("click", (e) => {
-        const btn = e.target.closest(".cat-btn");
-        if (!btn) return;
-        document.querySelectorAll(".cat-btn").forEach(b => {
-            b.classList.remove("active", "bg-gemini-red", "text-white");
-            b.classList.add("bg-amber-50", "text-gemini-dark");
+    if (enterStoreBtn) {
+        enterStoreBtn.addEventListener("click", () => {
+            if (welcomeModal) welcomeModal.classList.remove("opacity-0", "pointer-events-none");
         });
-        btn.classList.add("active", "bg-gemini-red", "text-white");
-        btn.classList.remove("bg-amber-50", "text-gemini-dark");
-        currentCategory = btn.dataset.category;
-        renderProducts();
-    });
+    }
 
-    document.getElementById("open-cart-btn").addEventListener("click", openCartDrawer);
-    document.getElementById("close-cart-btn").addEventListener("click", closeCartDrawer);
-    document.getElementById("cart-drawer-overlay").addEventListener("click", (e) => {
-        if (e.target === e.currentTarget) closeCartDrawer();
-    });
-    document.getElementById("clear-cart-btn").addEventListener("click", () => { cart = []; updateCartUI(); saveRememberedState(); });
+    const continueGuestBtn = document.getElementById("continue-as-guest-btn");
+    if (continueGuestBtn) {
+        continueGuestBtn.addEventListener("click", () => {
+            rememberMeEnabled = rememberCheckbox ? rememberCheckbox.checked : false;
+            localStorage.setItem(REMEMBER_KEY, rememberMeEnabled ? "true" : "false");
+            if (!rememberMeEnabled) {
+                localStorage.removeItem(APP_STATE_KEY);
+                localStorage.removeItem(FEEDBACK_KEY);
+                publishedServiceFeedback = [];
+            } else {
+                saveRememberedState();
+            }
+            if (welcomeModal) welcomeModal.classList.add("opacity-0", "pointer-events-none");
+            if (landingPortal) landingPortal.classList.add("opacity-0", "pointer-events-none");
+            updateCartUI();
+            renderProducts();
+            renderOrdersUI();
+            renderReviewableProductsUI();
+            renderPublishedFeedback();
+        });
+    }
 
-    document.getElementById("radio-pickup").addEventListener("change", handleOrderTypeChange);
-    document.getElementById("radio-delivery").addEventListener("change", handleOrderTypeChange);
-    document.getElementById("checkout-form").addEventListener("submit", handleCheckoutProcess);
+    if (navMenuBtn) navMenuBtn.addEventListener("click", () => switchView("MENU"));
+    if (navOrdersBtn) navOrdersBtn.addEventListener("click", () => switchView("ORDERS"));
+    if (navReviewBtn) navReviewBtn.addEventListener("click", () => switchView("REVIEW"));
     
-    document.getElementById("close-modal-btn").addEventListener("click", () => {
-        document.getElementById("receipt-modal").classList.add("opacity-0", "pointer-events-none");
-    });
-    document.getElementById("finish-order-btn").addEventListener("click", () => {
-        document.getElementById("receipt-modal").classList.add("opacity-0", "pointer-events-none");
-        switchView("ORDERS");
-    });
+    const brandHome = document.getElementById("nav-brand-home");
+    if (brandHome) brandHome.addEventListener("click", () => switchView("MENU"));
+
+    const searchInput = document.getElementById("search-input");
+    if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+            searchQuery = e.target.value.toLowerCase();
+            renderProducts();
+        });
+    }
+
+    const categoryFilters = document.getElementById("category-filters");
+    if (categoryFilters) {
+        categoryFilters.addEventListener("click", (e) => {
+            const btn = e.target.closest(".cat-btn");
+            if (!btn) return;
+            document.querySelectorAll(".cat-btn").forEach(b => {
+                b.classList.remove("active", "bg-gemini-red", "text-white");
+                b.classList.add("bg-amber-50", "text-gemini-dark");
+            });
+            btn.classList.add("active", "bg-gemini-red", "text-white");
+            btn.classList.remove("bg-amber-50", "text-gemini-dark");
+            currentCategory = btn.dataset.category;
+            renderProducts();
+        });
+    }
+
+    const openCartBtn = document.getElementById("open-cart-btn");
+    if (openCartBtn) openCartBtn.addEventListener("click", openCartDrawer);
+
+    const closeCartBtn = document.getElementById("close-cart-btn");
+    if (closeCartBtn) closeCartBtn.addEventListener("click", closeCartDrawer);
+
+    const cartDrawerOverlay = document.getElementById("cart-drawer-overlay");
+    if (cartDrawerOverlay) {
+        cartDrawerOverlay.addEventListener("click", (e) => {
+            if (e.target === e.currentTarget) closeCartDrawer();
+        });
+    }
+
+    const clearCartBtn = document.getElementById("clear-cart-btn");
+    if (clearCartBtn) {
+        clearCartBtn.addEventListener("click", () => {
+            cart = [];
+            updateCartUI();
+            saveRememberedState();
+        });
+    }
+
+    const radioPickup = document.getElementById("radio-pickup");
+    if (radioPickup) radioPickup.addEventListener("change", handleOrderTypeChange);
+
+    const radioDelivery = document.getElementById("radio-delivery");
+    if (radioDelivery) radioDelivery.addEventListener("change", handleOrderTypeChange);
+
+    const checkoutForm = document.getElementById("checkout-form");
+    if (checkoutForm) checkoutForm.addEventListener("submit", handleCheckoutProcess);
+    
+    const closeModalBtn = document.getElementById("close-modal-btn");
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener("click", () => {
+            const receiptModal = document.getElementById("receipt-modal");
+            if (receiptModal) receiptModal.classList.add("opacity-0", "pointer-events-none");
+        });
+    }
+
+    const finishOrderBtn = document.getElementById("finish-order-btn");
+    if (finishOrderBtn) {
+        finishOrderBtn.addEventListener("click", () => {
+            const receiptModal = document.getElementById("receipt-modal");
+            if (receiptModal) receiptModal.classList.add("opacity-0", "pointer-events-none");
+            switchView("ORDERS");
+        });
+    }
 
     setupServiceRating();
     setupProductReviewStars();
@@ -229,11 +271,9 @@ function initClockAndStatus() {
         document.getElementById("live-date").textContent = now.toLocaleDateString('en-US', options);
         document.getElementById("live-time").textContent = now.toLocaleTimeString('en-US');
 
-        // BUKAS ANG STORE MULA 5:00 AM (5) HANGGANG 8:00 PM (20)
         const hour = now.getHours();
         const isOpen = hour >= 5 && hour < 20;
 
-        // Main Store Header Badge
         const mainBadge = document.getElementById("store-status-badge");
         if (isOpen) {
             mainBadge.className = "px-3 py-0.5 rounded-full text-xs font-black tracking-wide uppercase flex items-center gap-1.5 bg-emerald-100 text-emerald-800 border border-emerald-300 animate-pulse-ring";
@@ -243,7 +283,6 @@ function initClockAndStatus() {
             mainBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> STORE CLOSED`;
         }
 
-        // Update ang status ng lahat ng iba pang branches sa sidebar
         const branchTags = document.querySelectorAll(".branch-status-tag");
         branchTags.forEach(tag => {
             if (isOpen) {
@@ -257,7 +296,7 @@ function initClockAndStatus() {
     }
 
     updateTime();
-    setInterval(updateTime, 1000); // Nag-uupdate bawat segundo
+    setInterval(updateTime, 1000);
 }
 
 function renderProducts() {
@@ -343,7 +382,6 @@ function handleOrderTypeChange() {
     const counterOption = document.getElementById("payment-counter-option");
     const codOption = document.getElementById("payment-cod-option");
 
-    // Match the payment choice to the selected fulfillment method.
     counterOption.disabled = isDel;
     codOption.disabled = !isDel;
     paymentSelect.value = isDel ? "Cash on Delivery" : "Cash on Counter";
@@ -401,7 +439,7 @@ function handleCheckoutProcess(e) {
     e.preventDefault();
     if (cart.length === 0) return;
 
-        const name = document.getElementById("cust-name").value.trim();
+    const name = document.getElementById("cust-name").value.trim();
     const phoneInput = document.getElementById("cust-phone");
     const phone = phoneInput.value.trim();
     const address = document.getElementById("cust-address").value.trim();
@@ -423,7 +461,6 @@ function handleCheckoutProcess(e) {
 
         orderCounter++;
         const queueNo = "#" + String(orderCounter).padStart(3, '0');
-        // Demo-only ID. In the database version, MySQL should generate the primary key.
         const orderId = "GEMINI-" +
             new Date().getFullYear() + "-" +
             Date.now().toString().slice(-8) + "-" +
@@ -433,7 +470,6 @@ function handleCheckoutProcess(e) {
         const grandTotal = subtotal + shippingFee;
         const timestamp = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
 
-        // Cash payment status depends on the chosen fulfillment method.
         let paymentStatus = "Pay at Counter";
         if (paymentMethod === "Cash on Delivery") {
             paymentStatus = "Pay on Delivery";
@@ -454,13 +490,12 @@ function handleCheckoutProcess(e) {
             grandTotal,
             paymentMethod,
             paymentStatus,
-            status: isDelivery ? "Out for Delivery" : "Ready for Pickup" // Eligible for immediate receipt check demo
+            status: isDelivery ? "Out for Delivery" : "Ready for Pickup"
         };
 
         activeOrders.unshift(newOrder);
         saveRememberedState();
 
-        // Populate receipt modal
         document.getElementById("receipt-queue-no").textContent = queueNo;
         document.getElementById("receipt-order-id").textContent = orderId;
         document.getElementById("receipt-timestamp").textContent = timestamp;
@@ -572,25 +607,21 @@ function renderOrdersUI() {
 function markOrderReceived(idx) {
     const order = activeOrders[idx];
     
-    // Validate eligibility
     if (!["Ready for Pickup", "Out for Delivery", "Delivered or Ready for Collection"].includes(order.status)) {
         alert("This order is not yet eligible to be marked as received.");
         return;
     }
 
-    // Show loading spinner
     document.getElementById("loading-overlay").classList.remove("opacity-0", "pointer-events-none");
 
     setTimeout(() => {
         document.getElementById("loading-overlay").classList.add("opacity-0", "pointer-events-none");
 
-        // Update status and move from active queue to history
         order.status = "Received / Completed";
         order.paymentStatus = "Paid / Settled";
         historyOrders.unshift(order);
         activeOrders.splice(idx, 1);
 
-        // Add items to reviewable list
         order.items.forEach(item => {
             reviewableItems.push({
                 ...item,
@@ -604,7 +635,6 @@ function markOrderReceived(idx) {
         renderOrdersUI();
         saveRememberedState();
 
-        // Show exact required modal message: "Thank you for purchasing, Suki!"
         const thankyouModal = document.getElementById("thankyou-modal");
         thankyouModal.classList.remove("opacity-0", "pointer-events-none");
 
@@ -705,7 +735,6 @@ function renderReviewableProductsUI() {
         </div>
     `).join("");
 
-    // Attach star click listeners for each product card
     reviewableItems.forEach((item, idx) => {
         const starContainer = document.querySelector(`.product-stars-${idx}`);
         if (!starContainer || item.reviewed) return;
@@ -718,7 +747,6 @@ function renderReviewableProductsUI() {
                 });
             });
         });
-        // Highlight active stars if already rated
         if (item.rating > 0) {
             starContainer.querySelectorAll("i").forEach(s => {
                 s.classList.toggle("active", parseInt(s.dataset.val) <= item.rating);
@@ -743,9 +771,7 @@ function submitProductReview(idx) {
 
 document.addEventListener("DOMContentLoaded", function () {
     const phoneField = document.getElementById("cust-phone");
-
     if (!phoneField) return;
-
     phoneField.addEventListener("input", function () {
         this.value = this.value.replace(/\D/g, "").slice(0, 11);
     });
