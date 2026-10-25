@@ -20,6 +20,7 @@
     padding: 0;
 }
 
+/* 1. Siguraduhing sakop ang buong lapad ng mobile screen */
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-main);
@@ -28,6 +29,9 @@ body {
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 /* Typography Helpers */
@@ -240,11 +244,12 @@ body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
+/* 2. Ayusin ang Header Inner width para hindi maipit sa kaliwa */
 .header-inner {
     max-width: 1400px;
-    width: 96vw;
+    width: 100%;
     margin: 0 auto;
-    padding: 0.75rem 0.5rem;
+    padding: 0.75rem 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -357,12 +362,13 @@ body {
 }
 
 /* App Main Body Views */
+/* 3. Ayusin ang Main App Views para mag-stretch nang maayos sa mobile */
 .view-section {
     flex: 1;
     max-width: 1400px;
-    width: 96vw;
+    width: 100%;
     margin: 0 auto;
-    padding: 1.25rem 0.5rem;
+    padding: 1.25rem 1rem;
 }
 
 .hidden {
@@ -1529,6 +1535,14 @@ body {
     font-size: 0.85rem;
     border-top: 4px solid var(--gemini-yellow);
     margin-top: auto;
+}
+
+/* 4. Siguraduhing responsive ang app container */
+.app-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
 
 /* PRINT MEDIA OVERRIDE */
