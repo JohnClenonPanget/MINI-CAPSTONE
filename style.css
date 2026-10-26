@@ -1560,9 +1560,6 @@ body {
     }
 }
 
-/* ==========================================
-   TABLET & DESKTOP MEDIA QUERIES (@media)
-   ========================================== */
 @media (min-width: 640px) {
     .order-card-header {
         flex-direction: row;
@@ -1606,9 +1603,6 @@ body {
     }
 }
 
-/* ==========================================
-   PRODUCT REVIEW TEXTAREA CUSTOM STYLING
-   ========================================== */
 .review-card textarea {
     width: 100%;
     padding: 0.75rem 1rem;
