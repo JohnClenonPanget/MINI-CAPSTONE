@@ -1,19 +1,74 @@
+<?php
+// ==========================================
+// GEMINI BAKERY EXPRESS — MAIN STORE INDEX
+// ==========================================
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params(["httponly" => true, "samesite" => "Lax"]);
+    session_start();
+}
+include "db.php";
+
+// Lalabas lang nang isang beses ang error; pag-refresh, mawawala na (walang paulit-ulit na login)
+$login_error = $_SESSION["login_error"] ?? "";
+unset($_SESSION["login_error"]);
+$is_admin = !empty($_SESSION["admin_logged_in"]);
+
+// Handle Admin Login submission mula sa Modal
+if (isset($_POST["login_btn"])) {
+    $username = trim($_POST["username"]);
+    $password = $_POST["password"];
+
+    $sql = "SELECT id, username, password FROM admin_users WHERE username = ?";
+    $stmt = mysqli_prepare($conn, $sql);
+    mysqli_stmt_bind_param($stmt, "s", $username);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    if ($row = mysqli_fetch_assoc($result)) {
+        if (password_verify($password, $row["password"])) {
+            session_regenerate_id(true);
+            $_SESSION["admin_logged_in"] = true;
+            $_SESSION["admin_username"] = $row["username"];
+            
+            // Kung admin, deretso sa admin.php
+            header("Location: admin.php");
+            exit();
+        } else {
+            $login_error = "Mali ang username o password.";
+        }
+    } else {
+        $login_error = "Mali ang username o password.";
+    }
+    mysqli_stmt_close($stmt);
+
+    // Post/Redirect/Get: iwas ulit-submit ng maling login kapag nag-refresh
+    $_SESSION["login_error"] = $login_error;
+    header("Location: index.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Bakery Express Pre-Ordering System - Palengke Branch</title>
+    <title>Gemini Bakery Express | Pre-Order Fresh Bread in Lucena City</title>
+    <meta name="description" content="Pre-order fresh pandesal, ensaymada, kakanin, and cakes from Gemini Bakery, Palengke Branch, Lucena City. Pick-up or delivery. Open daily 5AM-8PM.">
+    <meta name="theme-color" content="#b91c1c">
+    <meta property="og:title" content="Gemini Bakery Express - Lucena City">
+    <meta property="og:description" content="Mainit at bagong hurno araw-araw. Pre-order online, skip the line.">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="logo.svg" type="image/svg+xml">
 
     <!-- FontAwesome & Google Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=<?php echo filemtime(__DIR__ . '/style.css'); ?>">
 </head>
 <body>
 
     <!-- 1. LANDING PORTAL SCREEN -->
-    <div id="landing-portal" class="overlay-screen">
+    <section id="landing-portal" class="overlay-screen hero-section">
         <div class="landing-content">
             <div class="stripe-bar"></div>
 
@@ -34,33 +89,90 @@
                 <span>Open Daily: <strong>5:00 AM - 8:00 PM</strong> | Juarez St. cor. Merchan St.</span>
             </div>
 
-            <button id="enter-store-btn" class="primary-btn lg-btn">
+            <!-- Pag pinindot, ii-scroll papunta sa menu -->
+            <button id="enter-store-btn" type="button" class="primary-btn lg-btn" onclick="startOrdering()">
                 <i class="fa-solid fa-basket-shopping"></i>
                 <span>ORDER NOW / BILI NA!</span>
-                <i class="fa-solid fa-arrow-right"></i>
+                <i class="fa-solid fa-arrow-down"></i>
             </button>
         </div>
-        <p class="copyright-text">© 2026 Gemini Bakery Express • Lucena City Local Market Branch</p>
-    </div>
+        </section>
 
-    <!-- WELCOME MODAL -->
-    <div id="welcome-modal" class="modal-overlay hidden-modal" role="dialog" aria-modal="true">
-        <div class="modal-card">
-            <img src="logo.svg" alt="Gemini Bakery logo" class="welcome-logo">
-            <div class="modal-header-text">
-                <h2>Welcome, Suki!</h2>
-                <p>Welcome to Gemini Bakery Express. Continue as a guest and start ordering.</p>
+    <!-- LOGIN MODAL (Lalabas pagka-click ng Order Now) -->
+    <div id="login-modal" class="modal-overlay hidden-modal" role="dialog" aria-modal="true">
+        <div class="modal-card" style="max-width: 420px; text-align: left; position: relative;">
+            <button id="close-login-btn" type="button" class="close-icon-btn dark" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <img src="logo.svg" alt="Gemini Bakery logo" style="width: 70px; margin-bottom: 0.5rem;">
+                <h2 style="color: var(--gemini-red); font-size: 1.5rem;">Admin Login</h2>
+                <p style="color: #6b7280; font-size: 0.9rem;">Para sa Gemini Bakery staff lamang.</p>
             </div>
-            <label class="remember-option">
-                <input id="remember-me-checkbox" type="checkbox">
-                <span>Remember Me</span>
-            </label>
-            <p class="small-subtext">Tandaan ang impormasyon ko para sa mas mabilis na pag-order at pagsusubaybay sa aking mga transaksyon sa susunod.</p>
-            <button id="continue-as-guest-btn" type="button" class="primary-btn full-btn">Continue as Guest <i class="fa-solid fa-arrow-right"></i></button>
+
+            <?php if (!empty($login_error)): ?>
+                <div style="background: #fee2e2; color: #991b1b; padding: 0.75rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 700; margin-bottom: 1rem;">
+                    <?php echo htmlspecialchars($login_error); ?>
+                </div>
+            <?php endif; ?>
+
+            <form action="index.php" method="POST" style="display: flex; flex-direction: column; gap: 1rem;">
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label" style="font-size: 0.85rem; font-weight: 600;">Admin Username</label>
+                    <input type="text" name="username" required placeholder="admin" autocomplete="username" style="width: 100%; padding: 0.75rem; border: 1.5px solid #fde68a; border-radius: 0.85rem; background: #fffbeb;">
+                </div>
+
+                <div class="form-group" style="margin: 0;">
+                    <label class="form-label" style="font-size: 0.85rem; font-weight: 600;">Password</label>
+                    <input type="password" name="password" required placeholder="••••••••" autocomplete="current-password" style="width: 100%; padding: 0.75rem; border: 1.5px solid #fde68a; border-radius: 0.85rem; background: #fffbeb;">
+                </div>
+
+                <button type="submit" name="login_btn" class="primary-btn full-btn" style="margin-top: 0.5rem;">
+                    <i class="fa-solid fa-right-to-bracket"></i> Log In to Admin Dashboard
+                </button>
+            </form>
+
+            <div style="margin-top: 1.25rem; text-align: center; font-size: 0.85rem; color: #6b7280;">
+                Customer ka ba? Hindi kailangan ng account sa pag-order: <br>
+                <button id="continue-as-guest-btn" type="button" style="background: none; border: none; color: #b91c1c; font-weight: 700; cursor: pointer; margin-top: 0.5rem; text-decoration: underline;">
+                    Back to the bakery
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- MAIN APP SCREEN -->
+    <!-- CUSTOMER ACCOUNT MODAL -->
+    <div id="account-modal" class="modal-overlay hidden-modal" role="dialog" aria-modal="true" aria-labelledby="account-title">
+        <div class="modal-card" style="max-width: 420px; text-align: left; position: relative;">
+            <button id="close-account-btn" type="button" class="close-icon-btn dark" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+            <div style="text-align:center; margin-bottom:1rem;">
+                <img src="logo.svg" alt="Gemini Bakery logo" style="width:70px; margin-bottom:0.5rem;">
+                <h2 id="account-title" style="color: var(--gemini-red); font-size:1.4rem;">Your Suki Account</h2>
+                <p style="color:#6b7280; font-size:0.85rem;">Subaybayan ang orders mo sa kahit anong device. Pwede pa ring mag-order bilang guest.</p>
+            </div>
+            <div class="acct-tabs">
+                <button type="button" class="acct-tab active" data-tab="login">Sign in</button>
+                <button type="button" class="acct-tab" data-tab="register">Create account</button>
+            </div>
+            <div id="account-error" class="acct-error" role="alert"></div>
+            <form id="customer-login-form" class="acct-form">
+                <input type="email" name="email" required placeholder="Email" autocomplete="email">
+                <input type="password" name="password" required placeholder="Password" autocomplete="current-password">
+                <button type="submit" class="primary-btn full-btn"><i class="fa-solid fa-right-to-bracket"></i> Sign in</button>
+            </form>
+            <form id="customer-register-form" class="acct-form hidden">
+                <input type="text" name="name" required maxlength="80" placeholder="Full name" autocomplete="name">
+                <input type="email" name="email" required placeholder="Email" autocomplete="email">
+                <input type="tel" name="phone" id="register-phone" placeholder="Mobile (optional) e.g. 09171234567" autocomplete="tel">
+                <input type="password" name="password" required minlength="8" placeholder="Password (at least 8 characters)" autocomplete="new-password">
+                <button type="submit" class="primary-btn full-btn"><i class="fa-solid fa-user-plus"></i> Create account</button>
+            </form>
+            <div style="margin-top:1rem; text-align:center; font-size:0.85rem; color:#6b7280;">
+                <button id="account-guest-btn" type="button" class="primary-btn full-btn" style="background:#fff; border:2px solid #fde68a;">Continue as guest (no account needed)</button>
+                <button id="open-staff-login-btn" type="button" style="background:none; border:none; margin-top:0.75rem; color:#6b7280; text-decoration:underline; cursor:pointer;">Staff / Admin login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP SCREEN (Ordering Dashboard) -->
     <div id="main-app" class="app-container">
         <!-- HEADER / NAVBAR -->
         <header class="app-header">
@@ -89,6 +201,16 @@
                         </button>
                     </nav>
 
+                    <button id="open-account-btn" type="button" class="nav-tab"><i class="fa-solid fa-user"></i> <span class="tab-label">Sign in</span></button>
+                    <span id="account-menu" class="hidden" style="display:inline-flex; align-items:center; gap:0.5rem;">
+                        <span class="nav-tab" style="cursor:default;"><i class="fa-solid fa-circle-user"></i> <span id="account-name" class="tab-label"></span></span>
+                        <button id="logout-customer-btn" type="button" class="nav-tab" aria-label="Sign out"><i class="fa-solid fa-right-from-bracket"></i></button>
+                    </span>
+                    <?php if ($is_admin): ?>
+                        <a href="admin.php" class="nav-tab" style="text-decoration:none;"><i class="fa-solid fa-gauge"></i> <span class="tab-label">Dashboard</span></a>
+                    <?php else: ?>
+                        <button id="open-admin-login-btn" type="button" class="nav-tab"><i class="fa-solid fa-user-lock"></i> <span class="tab-label">Admin</span></button>
+                    <?php endif; ?>
                     <button id="open-cart-btn" class="cart-trigger-btn">
                         <i class="fa-solid fa-basket-shopping"></i>
                         <span class="cart-label">Basket</span>
@@ -159,39 +281,6 @@
                             <div><strong>Contact No:</strong><span>(042) 710-1975 / 0917-555-7575</span></div>
                         </div>
                     </div>
-
-                    <div class="sidebar-card">
-                        <div>
-                            <h3 class="card-title"><i class="fa-solid fa-sitemap"></i> Other Lucena Branches</h3>
-                            <p class="card-subtitle">You can also visit us on:</p>
-                        </div>
-
-                        <div class="branches-list">
-                            <div class="branch-item">
-                                <div class="branch-header">
-                                    <span class="branch-name">Gulang-Gulang Branch</span>
-                                    <span class="branch-status-tag">--</span>
-                                </div>
-                                <p class="branch-address">Maharlika Highway, Brgy. Gulang-Gulang</p>
-                            </div>
-
-                            <div class="branch-item">
-                                <div class="branch-header">
-                                    <span class="branch-name">Iyam Branch</span>
-                                    <span class="branch-status-tag">--</span>
-                                </div>
-                                <p class="branch-address">Quezon Avenue, Brgy. Iyam</p>
-                            </div>
-
-                            <div class="branch-item">
-                                <div class="branch-header">
-                                    <span class="branch-name">Red-V Branch</span>
-                                    <span class="branch-status-tag">--</span>
-                                </div>
-                                <p class="branch-address">Diversion Road corner Red-V</p>
-                            </div>
-                        </div>
-                    </div>
                 </aside>
             </div>
         </div>
@@ -217,7 +306,7 @@
             </div>
 
             <div class="orders-group history-group">
-                <h3 class="section-title"><i class="fa-solid fa-sclock-rotate-left"></i> Completed Transaction History</h3>
+                <h3 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Completed Transaction History</h3>
                 <div id="history-orders-list" class="orders-list"></div>
                 <div id="no-history-orders" class="empty-orders-card font-light">
                     Wala pang nakaraang completed transaction.
@@ -225,66 +314,41 @@
             </div>
         </div>
 
-        <!-- VIEW 3: SEPARATE TO REVIEW SCREEN -->
+        <!-- VIEW 3: TO REVIEW SCREEN -->
         <div id="view-review" class="view-section hidden">
             <div class="review-header-banner">
                 <h2>Service & Product Reviews ⭐</h2>
                 <p>Mag-iwan ng Service Feedback sa itaas at mag-rate ng inyong biniling mga tinapay sa ibaba!</p>
             </div>
-
-            <div class="feedback-layout">
-                <main class="feedback-main">
-                    <div class="review-card">
-                        <h3 class="card-subtitle-bold"><i class="fa-solid fa-store"></i> A. Service Feedback Form</h3>
-                        <form id="service-feedback-form" class="form-grid">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Inyong Pangalan <span class="required">*</span></label>
-                                    <input type="text" id="service-author" required placeholder="e.g. Juan Cruz">
-                                </div>
-                                <div class="form-group">
-                                    <label>Service Rating <span class="required">*</span></label>
-                                    <div class="star-rating service-stars" id="service-star-container">
-                                        <i class="fa-solid fa-star" data-rating="1"></i>
-                                        <i class="fa-solid fa-star" data-rating="2"></i>
-                                        <i class="fa-solid fa-star" data-rating="3"></i>
-                                        <i class="fa-solid fa-star" data-rating="4"></i>
-                                        <i class="fa-solid fa-star" data-rating="5"></i>
-                                    </div>
-                                    <span id="service-rating-text" class="rating-hint">Pumili ng 1-5 stars</span>
-                                </div>
+            <div class="menu-layout">
+                <section class="menu-main">
+                    <h3 class="section-title"><i class="fa-solid fa-box-open"></i> Rate Your Purchased Products</h3>
+                    <div id="product-review-cards-container" style="display:grid; gap:1rem;"></div>
+                    <div id="no-reviewable-products" class="empty-orders-card"><p>Wala pang produktong pwedeng i-review. Mag-order muna at i-click ang "Order Received".</p></div>
+                </section>
+                <aside class="menu-sidebar">
+                    <div class="sidebar-card">
+                        <div class="card-title-bar"><span class="card-title"><i class="fa-solid fa-comment-dots"></i> Service Feedback</span></div>
+                        <form id="service-feedback-form" style="display:flex; flex-direction:column; gap:0.75rem;">
+                            <input type="text" id="service-author" required maxlength="40" placeholder="Your name">
+                            <div id="service-star-container" class="star-rating" role="radiogroup" aria-label="Service rating">
+                                <i class="fa-solid fa-star" data-rating="1"></i><i class="fa-solid fa-star" data-rating="2"></i><i class="fa-solid fa-star" data-rating="3"></i><i class="fa-solid fa-star" data-rating="4"></i><i class="fa-solid fa-star" data-rating="5"></i>
                             </div>
-                            <div class="form-group">
-                                <textarea id="service-comment" rows="2" placeholder="Feedback para sa aming staff o delivery..."></textarea>
-                            </div>
-                            <button type="submit" class="primary-btn full-btn">Submit Feedback</button>
+                            <p id="service-rating-text" class="rating-hint">Pumili ng 1-5 stars</p>
+                            <textarea id="service-comment" rows="3" maxlength="300" placeholder="Ano ang masasabi mo sa serbisyo namin?"></textarea>
+                            <button type="submit" class="primary-btn full-btn"><i class="fa-solid fa-paper-plane"></i> Submit Feedback</button>
                         </form>
+                        <h4 class="drawer-section-title" style="margin-top:1.25rem;">What suki say</h4>
+                        <div id="published-feedback-list" class="published-feedback-container"></div>
                     </div>
-
-                    <div class="review-card">
-                        <h3 class="card-subtitle-bold"><i class="fa-solid fa-cookie-bite"></i> B. Individual Purchased Product Reviews</h3>
-                        <div id="product-review-cards-container" class="product-reviews-list"></div>
-                        <div id="no-reviewable-products" class="empty-orders-card">
-                            <p>Wala pang produkto na available para i-review.</p>
-                        </div>
-                    </div>
-                </main>
-
-                <aside class="customer-feedback-panel">
-                    <div class="panel-header">
-                        <i class="fa-solid fa-comments"></i>
-                        <h3>Customer Feedback Wall</h3>
-                    </div>
-                    <div id="published-feedback-list" class="published-feedback-container"></div>
                 </aside>
             </div>
         </div>
     </div>
 
     <!-- BASKET DRAWER -->
-    <!-- BASKET DRAWER (EXACT ORIGINAL DESIGN) -->
     <div id="cart-drawer-overlay" class="drawer-overlay hidden-modal">
-        <div id="cart-drawer" class="cart-drawer">
+        <div id="cart-drawer" class="cart-drawer" style="transform: translateX(100%);">
             <div class="drawer-header">
                 <div class="drawer-title">
                     <i class="fa-solid fa-basket-shopping"></i>
@@ -297,7 +361,6 @@
             </div>
 
             <div class="drawer-body custom-scrollbar">
-                <!-- ORDER ITEMS SECTION -->
                 <div class="drawer-section">
                     <h3 class="drawer-section-title">ORDER ITEMS</h3>
                     <div id="cart-items-container" class="cart-items-list"></div>
@@ -309,7 +372,6 @@
 
                 <hr class="drawer-divider">
 
-                <!-- CHECKOUT & FULFILLMENT SECTION -->
                 <form id="checkout-form" class="checkout-form">
                     <h3 class="drawer-section-title"><i class="fa-solid fa-truck-fast"></i> CHECKOUT & FULFILLMENT</h3>
 
@@ -426,7 +488,6 @@
                 </div>
             </div>
 
-            <!-- SAVE AS PDF & DONE BUTTONS -->
             <div class="receipt-actions">
                 <button id="download-receipt-btn" type="button" class="success-btn">
                     <i class="fa-solid fa-file-pdf"></i> Save Receipt (PDF / Photo)
@@ -463,10 +524,51 @@
         </div>
     </div>
 
-    <footer class="app-footer">
-        <p>Gemini Bakery Express • Palengke Branch, Lucena City</p>
+    <footer class="app-footer site-footer">
+        <div class="footer-grid">
+            <div>
+                <img src="logo.svg" alt="Gemini Bakery" style="width:110px; border-radius:0.5rem;">
+                <p>Mainit at bagong hurno araw-araw simula 1975.</p>
+            </div>
+            <div>
+                <strong>Visit us</strong>
+                <p>Juarez St. cor. Merchan St.,<br>Lucena Local Market, Lucena City</p>
+                <p>Open daily 5:00 AM - 8:00 PM</p>
+            </div>
+            <div>
+                <strong>Contact</strong>
+                <p>(042) 710-1975<br>0917-555-7575</p>
+            </div>
+            <div>
+                <strong>Settings</strong>
+                <label class="remember-label"><input type="checkbox" id="remember-me-checkbox"> Save my basket and orders on this device</label>
+                <?php if ($is_admin): ?><p><a href="logout.php">Log out (<?php echo htmlspecialchars($_SESSION["admin_username"] ?? "admin"); ?>)</a></p><?php endif; ?>
+            </div>
+        </div>
+        <p class="footer-copy">© 2026 Gemini Bakery Express • Palengke Branch, Lucena City</p>
     </footer>
 
-    <script src="script.js"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const modal = document.getElementById("login-modal");
+        const open = () => { modal.classList.remove("hidden-modal"); const u = modal.querySelector("input[name=username]"); if (u) u.focus(); };
+        const close = () => modal.classList.add("hidden-modal");
+
+        document.getElementById("open-admin-login-btn")?.addEventListener("click", open);
+        document.getElementById("continue-as-guest-btn")?.addEventListener("click", close);
+        document.getElementById("close-login-btn")?.addEventListener("click", close);
+        modal.addEventListener("click", e => { if (e.target === modal) close(); });
+        document.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
+
+        <?php if (!empty($login_error)): ?> open(); <?php endif; ?>
+    });
+    </script>
+    <script>
+    // Fallback: kung luma ang script.js (hindi napalitan o naka-cache), magbigay ng malinaw na mensahe
+    function startOrdering() {
+        alert("Luma pa ang script.js sa website mo. Palitan ito ng bagong script.js, tapos pindutin ang Ctrl + Shift + R.");
+    }
+    </script>
+    <script src="script.js?v=<?php echo filemtime(__DIR__ . '/script.js'); ?>"></script>
 </body>
 </html>

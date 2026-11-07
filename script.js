@@ -24,7 +24,7 @@ const PRODUCTS = [
     { id: 16, name: "Condensed Milk Dip", category: "PALAMAN SECTION", price: 45.00, desc: "Sweetened condensed dip for breadsticks and rolls.", img: "https://i.pinimg.com/1200x/49/76/30/4976309f19b4cf2dde3f8aca4ea116b1.jpg" },
 
     // KAKANIN SECTION (6 Items)
-    { id: 16, name: "Special Bibingka", category: "KAKANIN SECTION", price: 25.00, desc: "Baked rice cake topped with salted egg and cheese.", img: "https://i.pinimg.com/1200x/51/57/ab/5157abe0608454ce42e817c75176faef.jpg" },
+    { id: 37, name: "Special Bibingka", category: "KAKANIN SECTION", price: 25.00, desc: "Baked rice cake topped with salted egg and cheese.", img: "https://i.pinimg.com/1200x/51/57/ab/5157abe0608454ce42e817c75176faef.jpg" },
     { id: 17, name: "Puto Lucena (Box)", category: "KAKANIN SECTION", price: 10.00, desc: "Fluffy steamed rice cakes topped with melting cheese.", img: "https://i.pinimg.com/1200x/5b/e0/a7/5be0a7459c79507fb3d82e5d5743834a.jpg" },
     { id: 18, name: "Kutsinta w/ Coconut", category: "KAKANIN SECTION", price: 10.00, desc: "Chewy steamed rice cakes served with freshly grated coconut.", img: "https://i.pinimg.com/1200x/6f/54/25/6f5425e4faeeadf176806660ee12d838.jpg" },
     { id: 19, name: "Sapin-Sapin Slice", category: "KAKANIN SECTION", price: 15.00, desc: "Layered sticky glutinous rice cake with jackfruit and ube.", img: "https://i.pinimg.com/736x/17/48/f7/1748f7c57f46753aad467937c4fb9276.jpg" },
@@ -49,6 +49,12 @@ const PRODUCTS = [
     { id: 36, name: "Pianono Roll", category: "CAKES & PASTRIES", price: 15.00, desc: "Traditional mini jelly roll cake filled with butter and sugar.", img: "https://i.pinimg.com/1200x/82/98/dd/8298dd758992826ebce04a8bd8b915ec.jpg" }
 ];
 
+function apiPost(action, data) {
+    return fetch("api.php?action=" + action, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) })
+        .then(r => r.json()).catch(() => null);
+}
+
+let currentCustomer = null;
 let cart = [];
 let activeOrders = [];
 let historyOrders = [];
@@ -83,7 +89,7 @@ function loadRememberedState() {
 }
 
 function saveRememberedState() {
-    if (!rememberMeEnabled) return;
+    if (!rememberMeEnabled || currentCustomer) return;
     try {
         localStorage.setItem(APP_STATE_KEY, JSON.stringify({ cart, activeOrders, historyOrders, reviewableItems, orderCounter }));
         localStorage.setItem(FEEDBACK_KEY, JSON.stringify(publishedServiceFeedback));
@@ -120,39 +126,16 @@ window.addEventListener("DOMContentLoaded", () => {
     renderProducts();
     updateCartUI();
 
-    const welcomeModal = document.getElementById("welcome-modal");
     const rememberCheckbox = document.getElementById("remember-me-checkbox");
     if (rememberCheckbox) {
         rememberCheckbox.checked = rememberMeEnabled;
-    }
-
-    const enterStoreBtn = document.getElementById("enter-store-btn");
-    if (enterStoreBtn) {
-        enterStoreBtn.addEventListener("click", () => {
-            if (welcomeModal) welcomeModal.classList.remove("hidden-modal");
-        });
-    }
-
-    const continueGuestBtn = document.getElementById("continue-as-guest-btn");
-    const landingPortal = document.getElementById("landing-portal");
-    if (continueGuestBtn) {
-        continueGuestBtn.addEventListener("click", () => {
-            rememberMeEnabled = rememberCheckbox ? rememberCheckbox.checked : false;
-            localStorage.setItem(REMEMBER_KEY, rememberMeEnabled ? "true" : "false");
-            if (!rememberMeEnabled) {
-                localStorage.removeItem(APP_STATE_KEY);
-                localStorage.removeItem(FEEDBACK_KEY);
-                publishedServiceFeedback = [];
-            } else {
-                saveRememberedState();
-            }
-            if (welcomeModal) welcomeModal.classList.add("hidden-modal");
-            if (landingPortal) landingPortal.classList.add("hidden-modal");
-            updateCartUI();
-            renderProducts();
-            renderOrdersUI();
-            renderReviewableProductsUI();
-            renderPublishedFeedback();
+        rememberCheckbox.addEventListener("change", () => {
+            rememberMeEnabled = rememberCheckbox.checked;
+            try {
+                localStorage.setItem(REMEMBER_KEY, rememberMeEnabled ? "true" : "false");
+                if (rememberMeEnabled) saveRememberedState();
+                else { localStorage.removeItem(APP_STATE_KEY); localStorage.removeItem(FEEDBACK_KEY); }
+            } catch (e) { console.warn(e); }
         });
     }
 
@@ -262,6 +245,14 @@ window.addEventListener("DOMContentLoaded", () => {
     setupServiceRating();
     renderOrdersUI();
     renderPublishedFeedback();
+
+    // Ipakita ang feedback ng lahat ng customer mula sa database
+    fetch("api.php?action=feedback").then(r => r.json()).then(d => {
+        if (d && d.ok) { publishedServiceFeedback = d.items; renderPublishedFeedback(); }
+    }).catch(() => {});
+
+    setupAccountModal();
+    initAccount();
 });
 
 function switchView(view) {
@@ -521,15 +512,23 @@ function handleCheckoutProcess(e) {
     const loadingOverlay = document.getElementById("loading-overlay");
     if (loadingOverlay) loadingOverlay.classList.remove("hidden-modal");
 
-    setTimeout(() => {
+    setTimeout(async () => {
         if (loadingOverlay) loadingOverlay.classList.add("hidden-modal");
 
         orderCounter++;
-        const queueNo = "#" + String(orderCounter).padStart(3, '0');
-        const orderId = "GEMINI-" +
+        let queueNo = "#" + String(orderCounter).padStart(3, '0');
+        let orderId = "GEMINI-" +
             new Date().getFullYear() + "-" +
             Date.now().toString().slice(-8) + "-" +
             Math.floor(100 + Math.random() * 900);
+
+        // I-save sa database; kapag walang server, tuloy pa rin gamit ang local na numero
+        const saved = await apiPost("order", {
+            name, phone, address, schedule,
+            type: isDelivery ? "DELIVERY" : "PICKUP",
+            items: cart.map(i => ({ id: i.id, qty: i.qty }))
+        });
+        if (saved && saved.ok) { orderId = saved.orderId; queueNo = saved.queueNo; }
         const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
         const shippingFee = isDelivery ? 49.00 : 0.00;
         const grandTotal = subtotal + shippingFee;
@@ -555,8 +554,8 @@ function handleCheckoutProcess(e) {
             status: isDelivery ? "Out for Delivery" : "Ready for Pickup"
         };
 
-        activeOrders.unshift(newOrder);
-        saveRememberedState();
+        if (currentCustomer) await refreshAccountData();
+        else { activeOrders.unshift(newOrder); saveRememberedState(); }
 
         const setVal = (id, text) => {
             const el = document.getElementById(id);
@@ -627,8 +626,8 @@ function renderOrdersUI() {
                     </div>
 
                     <div class="order-info-box">
-                        <p><strong>Customer:</strong> ${o.name} (${o.phone})</p>
-                        <p><strong>Address:</strong> ${o.address}</p>
+                        <p><strong>Customer:</strong> ${escapeFeedbackText(o.name)} (${escapeFeedbackText(o.phone)})</p>
+                        <p><strong>Address:</strong> ${escapeFeedbackText(o.address)}</p>
                         <p><strong>Payment:</strong> ${o.paymentMethod} (<strong>${o.paymentStatus}</strong>)</p>
                     </div>
 
@@ -665,7 +664,7 @@ function renderOrdersUI() {
                         <span class="status-pill" style="background:#d1fae5; color:#065f46;">Completed</span>
                     </div>
                     <div class="order-info-box" style="background:#f9fafb;">
-                        <p><strong>Customer:</strong> ${o.name} | <strong>Date:</strong> ${o.timestamp}</p>
+                        <p><strong>Customer:</strong> ${escapeFeedbackText(o.name)} | <strong>Date:</strong> ${o.timestamp}</p>
                         <p><strong>Total Paid:</strong> ₱${o.grandTotal.toFixed(2)} (${o.paymentMethod})</p>
                         <p><strong>Items:</strong> ${o.items.map(i => `${i.name} (x${i.qty})`).join(', ')}</p>
                     </div>
@@ -686,6 +685,7 @@ function markOrderReceived(idx) {
         if (loadingOverlay) loadingOverlay.classList.add("hidden-modal");
 
         order.status = "Received / Completed";
+        apiPost("order_received", { orderId: order.orderId });
         order.paymentStatus = "Paid / Settled";
         historyOrders.unshift(order);
         activeOrders.splice(idx, 1);
@@ -744,6 +744,7 @@ function setupServiceRating() {
             const feedbackName = authorInput ? authorInput.value.trim() : "";
             const feedbackComment = commentInput ? commentInput.value.trim() : "";
 
+            apiPost("feedback", { name: feedbackName, rating: serviceRating, comment: feedbackComment });
             publishedServiceFeedback.push({
                 name: feedbackName,
                 rating: serviceRating,
@@ -798,7 +799,7 @@ function renderReviewableProductsUI() {
                     </div>
                 </div>
 
-                <textarea id="prod-comment-${idx}" rows="2" placeholder="Masarap at bagong hurno ang tinapay na ito!" ${item.reviewed ? 'disabled' : ''}>${item.comment}</textarea>
+                <textarea id="prod-comment-${idx}" rows="2" placeholder="Masarap at bagong hurno ang tinapay na ito!" ${item.reviewed ? 'disabled' : ''}>${escapeFeedbackText(item.comment)}</textarea>
 
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-size:0.75rem; font-weight:700; color:${item.reviewed ? '#047857' : '#92400e'}">
@@ -841,7 +842,119 @@ function submitProductReview(idx) {
     const commentInput = document.getElementById(`prod-comment-${idx}`);
     if (commentInput) item.comment = commentInput.value.trim();
     item.reviewed = true;
+    apiPost("review", { orderId: item.orderId, productId: item.id, rating: item.rating, comment: item.comment });
 
     alert(`Salamat! Ang review mo para sa "${item.name}" ay matagumpay nang na-submit.`);
     renderReviewableProductsUI();
+}
+
+// ==========================================
+// CUSTOMER ACCOUNTS
+// ==========================================
+async function refreshAccountData() {
+    if (!currentCustomer) return;
+    const d = await fetch("api.php?action=my_orders").then(r => r.json()).catch(() => null);
+    if (d && d.ok) {
+        const closed = s => s === "Completed" || s === "Cancelled";
+        activeOrders = d.orders.filter(o => !closed(o.status));
+        historyOrders = d.orders.filter(o => closed(o.status));
+        reviewableItems = [];
+        historyOrders.filter(o => o.status === "Completed").forEach(o => o.items.forEach(i =>
+            reviewableItems.push({ ...i, orderId: o.orderId, reviewed: i.rating > 0, rating: i.rating || 0, comment: i.comment || "" })));
+    }
+    renderOrdersUI();
+    renderReviewableProductsUI();
+    renderAccountUI();
+}
+
+function renderAccountUI() {
+    const signedIn = !!currentCustomer;
+    document.getElementById("open-account-btn")?.classList.toggle("hidden", signedIn);
+    document.getElementById("account-menu")?.classList.toggle("hidden", !signedIn);
+    if (!signedIn) return;
+    const first = currentCustomer.name.split(" ")[0];
+    const label = document.getElementById("account-name");
+    if (label) label.textContent = first;
+    const fill = (id, v) => { const el = document.getElementById(id); if (el && !el.value && v) el.value = v; };
+    fill("cust-name", currentCustomer.name);
+    fill("cust-phone", currentCustomer.phone);
+    fill("service-author", first);
+}
+
+async function initAccount() {
+    const d = await fetch("api.php?action=customer_me").then(r => r.json()).catch(() => null);
+    if (d && d.ok && d.customer) {
+        currentCustomer = d.customer;
+        await refreshAccountData();
+    }
+}
+
+function setupAccountModal() {
+    const modal = document.getElementById("account-modal");
+    if (!modal) return;
+    const err = document.getElementById("account-error");
+    const loginForm = document.getElementById("customer-login-form");
+    const registerForm = document.getElementById("customer-register-form");
+
+    const showTab = tab => {
+        document.querySelectorAll(".acct-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+        loginForm.classList.toggle("hidden", tab !== "login");
+        registerForm.classList.toggle("hidden", tab !== "register");
+        err.textContent = "";
+    };
+    const close = () => modal.classList.add("hidden-modal");
+
+    const open = tab => {
+        showTab(tab || "login");
+        modal.classList.remove("hidden-modal");
+        (tab === "register" ? registerForm : loginForm).querySelector("input")?.focus();
+    };
+    window.openAccountModal = open;
+    document.getElementById("open-account-btn")?.addEventListener("click", () => open("login"));
+    document.getElementById("account-guest-btn")?.addEventListener("click", () => { close(); scrollToMenu(); });
+    document.getElementById("open-staff-login-btn")?.addEventListener("click", () => {
+        close();
+        document.getElementById("login-modal")?.classList.remove("hidden-modal");
+    });
+    document.querySelectorAll(".acct-tab").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+    document.getElementById("close-account-btn")?.addEventListener("click", close);
+    modal.addEventListener("click", e => { if (e.target === modal) close(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
+
+    const regPhone = document.getElementById("register-phone");
+    if (regPhone) regPhone.addEventListener("input", () => { regPhone.value = regPhone.value.replace(/\D/g, "").slice(0, 11); });
+
+    const submit = (form, action) => form.addEventListener("submit", async e => {
+        e.preventDefault();
+        err.textContent = "";
+        const btn = form.querySelector("button[type=submit]");
+        btn.disabled = true;
+        const d = await apiPost(action, Object.fromEntries(new FormData(form)));
+        btn.disabled = false;
+        if (!d || !d.ok) { err.textContent = (d && d.error) || "Hindi ma-reach ang server. Subukan ulit."; return; }
+        currentCustomer = d.customer;
+        form.reset();
+        close();
+        await refreshAccountData();
+        scrollToMenu();
+    });
+    submit(loginForm, "customer_login");
+    submit(registerForm, "customer_register");
+
+    document.getElementById("logout-customer-btn")?.addEventListener("click", async () => {
+        await apiPost("customer_logout", {});
+        location.reload();
+    });
+}
+
+
+function scrollToMenu() {
+    switchView("MENU");
+    document.getElementById("view-menu")?.scrollIntoView({ behavior: "smooth" });
+}
+
+// "ORDER NOW / BILI NA!": kung wala pang account, ilabas ang Sign in / Create account / Guest
+function startOrdering() {
+    if (currentCustomer || typeof window.openAccountModal !== "function") scrollToMenu();
+    else window.openAccountModal("login");
 }
